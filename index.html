@@ -348,14 +348,66 @@
         </div>
       </section>
 
-      <section class="page" id="competitors">
-        <h1 class="page-title">Đối thủ cạnh tranh</h1>
-        <p class="subtitle">Quản lý Fanpage, tài khoản cá nhân và nhóm Facebook.</p>
-        <div class="card">
-          <h3 class="panel-title">Danh sách đối thủ</h3>
-          <div class="empty">Chức năng quản lý đối thủ sẽ được kết nối với cơ sở dữ liệu ở bước tiếp theo.</div>
-        </div>
-      </section>
+     
+<section class="page" id="competitors">
+  <h1 class="page-title">Đối thủ cạnh tranh</h1>
+  <p class="subtitle">
+    Quản lý Fanpage, tài khoản cá nhân và nhóm Facebook.
+  </p>
+
+  <div class="card">
+    <h3 class="panel-title">Kết nối dữ liệu</h3>
+    <p class="stat-note">
+      Nhập ADMIN_TOKEN đã tạo trong Cloudflare để truy cập dữ liệu.
+      Token chỉ được giữ trong bộ nhớ của trang hiện tại.
+    </p>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
+      <input
+        id="adminToken"
+        type="password"
+        placeholder="Nhập ADMIN_TOKEN"
+        autocomplete="off"
+        style="flex:1;min-width:220px;padding:12px;border:1px solid #ddd;border-radius:8px"
+      >
+      <button
+        id="connectApi"
+        style="padding:12px 20px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer"
+      >
+        Kết nối
+      </button>
+    </div>
+
+    <p id="apiMessage" class="stat-note" aria-live="polite"></p>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h3 class="panel-title">Danh sách đối thủ</h3>
+
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;text-align:left">
+        <thead>
+          <tr>
+            <th style="padding:12px;border-bottom:1px solid #eee">Tên</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Loại nguồn</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Đường dẫn</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody id="competitorList">
+          <tr>
+            <td colspan="4" style="padding:25px;text-align:center;color:#788496">
+              Chưa tải dữ liệu
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p id="competitorCount" class="stat-note"></p>
+  </div>
+</section>
+
 
       <section class="page" id="posts">
         <h1 class="page-title">Bài viết đối thủ</h1>
@@ -430,8 +482,111 @@
     });
   });
 
+  
   document.getElementById("mobileMenu").addEventListener("click", () => {
     sidebar.classList.toggle("open");
+  });
+
+  const API_BASE =
+    "https://ai-sales-intelligence-api.czcaonguyen.workers.dev";
+
+  let adminToken = "";
+
+  const tokenInput = document.getElementById("adminToken");
+  const connectButton = document.getElementById("connectApi");
+  const apiMessage = document.getElementById("apiMessage");
+  const competitorList = document.getElementById("competitorList");
+  const competitorCount = document.getElementById("competitorCount");
+
+  async function loadCompetitors() {
+    apiMessage.textContent = "Đang kết nối và tải dữ liệu...";
+
+    try {
+      const response = await fetch(
+        API_BASE + "/api/competitors",
+        {
+          method: "GET",
+          headers: {
+            "Authorization": "Bearer " + adminToken
+          }
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Không thể tải dữ liệu");
+      }
+
+      competitorList.replaceChildren();
+
+      if (result.data.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = 4;
+        cell.textContent = "Chưa có đối thủ cạnh tranh nào.";
+        cell.style.cssText =
+          "padding:25px;text-align:center;color:#788496";
+
+        row.appendChild(cell);
+        competitorList.appendChild(row);
+      }
+
+      result.data.forEach(item => {
+        const row = document.createElement("tr");
+
+        const values = [
+          item.name,
+          item.source_type,
+          item.facebook_url,
+          item.status
+        ];
+
+        values.forEach((value, index) => {
+          const cell = document.createElement("td");
+          cell.style.cssText =
+            "padding:12px;border-bottom:1px solid #eee";
+
+          if (index === 2) {
+            const link = document.createElement("a");
+            link.href = value;
+            link.textContent = "Mở Facebook";
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            cell.appendChild(link);
+          } else {
+            cell.textContent = value || "";
+          }
+
+          row.appendChild(cell);
+        });
+
+        competitorList.appendChild(row);
+      });
+
+      competitorCount.textContent =
+        "Tổng số đối thủ: " + result.total;
+
+      apiMessage.textContent = "Kết nối thành công. Đã tải dữ liệu từ D1.";
+
+    } catch (error) {
+      apiMessage.textContent = "Lỗi: " + error.message;
+      competitorList.replaceChildren();
+      competitorCount.textContent = "";
+    }
+  }
+
+  connectButton.addEventListener("click", async () => {
+    const token = tokenInput.value.trim();
+
+    if (!token) {
+      apiMessage.textContent = "Vui lòng nhập ADMIN_TOKEN.";
+      return;
+    }
+
+    adminToken = token;
+    await loadCompetitors();
   });
 </script>
 </body>
