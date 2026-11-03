@@ -1,0 +1,438 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101827">
+  <title>AI Sales Intelligence</title>
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --surface: #ffffff;
+      --sidebar: #101827;
+      --text: #182230;
+      --muted: #788496;
+      --primary: #6658e8;
+      --border: #e7eaf0;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: var(--sidebar);
+      color: white;
+      padding: 25px 17px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      font-size: 19px;
+      font-weight: 800;
+      margin: 4px 10px 35px;
+      line-height: 1.5;
+    }
+
+    .brand span { color: #a99fff; }
+
+    .nav-label {
+      color: #8792a5;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 12px 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      width: 100%;
+      padding: 13px 12px;
+      margin: 3px 0;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: #c5ccda;
+      text-align: left;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: #292d49;
+      color: white;
+    }
+
+    .main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .topbar {
+      height: 70px;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+    }
+
+    .topbar strong { font-size: 14px; }
+
+    .user {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .content {
+      padding: 30px;
+      max-width: 1450px;
+      margin: auto;
+    }
+
+    .page-title {
+      font-size: 25px;
+      font-weight: 800;
+      margin: 0 0 8px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 26px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 17px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 21px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat-value {
+      font-size: 29px;
+      font-weight: 800;
+      margin-top: 13px;
+    }
+
+    .stat-note {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 7px;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 750;
+      margin: 0 0 17px;
+    }
+
+    .welcome {
+      padding: 27px;
+      background: linear-gradient(120deg, #27234f, #6658e8);
+      color: white;
+      border-radius: 14px;
+      margin-bottom: 23px;
+    }
+
+    .welcome h2 {
+      font-size: 21px;
+      margin: 0 0 10px;
+    }
+
+    .welcome p {
+      color: #e0ddff;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .two-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 30px 10px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .status {
+      display: inline-block;
+      border-radius: 20px;
+      padding: 6px 10px;
+      background: #e9f8ef;
+      color: #23864b;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .mobile-menu {
+      display: none;
+      border: 0;
+      background: transparent;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { width: 210px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .content { padding: 20px; }
+    }
+
+    @media (max-width: 650px) {
+      .sidebar {
+        display: none;
+        position: fixed;
+        z-index: 10;
+        top: 70px;
+        bottom: 0;
+        left: 0;
+        width: 260px;
+      }
+
+      .sidebar.open { display: block; }
+      .mobile-menu { display: block; }
+      .topbar { padding: 0 15px; }
+      .content { padding: 18px 14px; }
+      .stats { gap: 10px; }
+      .stat-value { font-size: 24px; }
+      .two-columns { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">AI SALES<br><span>INTELLIGENCE</span></div>
+
+    <div class="nav-label">WORKSPACE</div>
+
+    <button class="nav-item active" data-page="dashboard">
+      <span>▦</span> Tổng quan
+    </button>
+
+    <button class="nav-item" data-page="competitors">
+      <span>♧</span> Đối thủ cạnh tranh
+    </button>
+
+    <button class="nav-item" data-page="posts">
+      <span>▤</span> Bài viết đối thủ
+    </button>
+
+    <div class="nav-label">AI TOOLS</div>
+
+    <button class="nav-item" data-page="analysis">
+      <span>◈</span> Phân tích AI
+    </button>
+
+    <button class="nav-item" data-page="products">
+      <span>◇</span> Sản phẩm của tôi
+    </button>
+
+    <button class="nav-item" data-page="generator">
+      <span>✦</span> Tạo nội dung AI
+    </button>
+
+    <div class="nav-label">SYSTEM</div>
+
+    <button class="nav-item" data-page="settings">
+      <span>⚙</span> Cài đặt
+    </button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mobile-menu" id="mobileMenu">☰</button>
+        <strong id="topTitle">Tổng quan</strong>
+      </div>
+      <div class="user">AI Sales Intelligence V1.0</div>
+    </header>
+
+    <div class="content">
+
+      <section class="page active" id="dashboard">
+        <h1 class="page-title">Tổng quan</h1>
+        <p class="subtitle">Trung tâm theo dõi và phân tích hoạt động bán hàng.</p>
+
+        <div class="welcome">
+          <h2>Chào mừng đến với AI Sales Intelligence</h2>
+          <p>
+            Theo dõi đối thủ, phát hiện bài viết nổi bật,
+            phân tích chiến lược nội dung và sáng tạo bài viết bán hàng
+            bằng trí tuệ nhân tạo.
+          </p>
+        </div>
+
+        <div class="stats">
+          <div class="card">
+            <div class="stat-label">Đối thủ cạnh tranh</div>
+            <div class="stat-value">0</div>
+            <div class="stat-note">Nguồn đã theo dõi</div>
+          </div>
+
+          <div class="card">
+            <div class="stat-label">Bài viết thu thập</div>
+            <div class="stat-value">0</div>
+            <div class="stat-note">Dữ liệu trong hệ thống</div>
+          </div>
+
+          <div class="card">
+            <div class="stat-label">Bài viết nổi bật</div>
+            <div class="stat-value">0</div>
+            <div class="stat-note">Theo hiệu quả tương đối</div>
+          </div>
+
+          <div class="card">
+            <div class="stat-label">Nội dung AI đã tạo</div>
+            <div class="stat-value">0</div>
+            <div class="stat-note">Bài viết được tạo</div>
+          </div>
+        </div>
+
+        <div class="two-columns">
+          <div class="card">
+            <h3 class="panel-title">Trạng thái hệ thống</h3>
+            <p><span class="status">Giao diện đã khởi tạo</span></p>
+            <p class="stat-note">Backend: Cloudflare Worker</p>
+            <p class="stat-note">Database: Cloudflare D1</p>
+            <p class="stat-note">Phiên bản dữ liệu: 1.0.0</p>
+          </div>
+
+          <div class="card">
+            <h3 class="panel-title">Hoạt động gần đây</h3>
+            <div class="empty">
+              Chưa có hoạt động nào.<br>
+              Hãy bắt đầu bằng cách thêm đối thủ cạnh tranh.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="competitors">
+        <h1 class="page-title">Đối thủ cạnh tranh</h1>
+        <p class="subtitle">Quản lý Fanpage, tài khoản cá nhân và nhóm Facebook.</p>
+        <div class="card">
+          <h3 class="panel-title">Danh sách đối thủ</h3>
+          <div class="empty">Chức năng quản lý đối thủ sẽ được kết nối với cơ sở dữ liệu ở bước tiếp theo.</div>
+        </div>
+      </section>
+
+      <section class="page" id="posts">
+        <h1 class="page-title">Bài viết đối thủ</h1>
+        <p class="subtitle">Lưu trữ và theo dõi nội dung từ các nguồn cạnh tranh.</p>
+        <div class="card">
+          <div class="empty">Chưa có bài viết được thu thập.</div>
+        </div>
+      </section>
+
+      <section class="page" id="analysis">
+        <h1 class="page-title">Phân tích AI</h1>
+        <p class="subtitle">Tìm hiểu lý do bài viết có hiệu quả cao.</p>
+        <div class="card">
+          <div class="empty">Chức năng phân tích AI sẽ được phát triển ở bước tiếp theo.</div>
+        </div>
+      </section>
+
+      <section class="page" id="products">
+        <h1 class="page-title">Sản phẩm của tôi</h1>
+        <p class="subtitle">Quản lý thông tin sản phẩm phục vụ sáng tạo nội dung.</p>
+        <div class="card">
+          <div class="empty">Chưa có sản phẩm. Chức năng quản lý sản phẩm sẽ được kết nối sau.</div>
+        </div>
+      </section>
+
+      <section class="page" id="generator">
+        <h1 class="page-title">Tạo nội dung AI</h1>
+        <p class="subtitle">Sáng tạo nội dung bán hàng bằng tiếng Việt.</p>
+        <div class="card">
+          <div class="empty">
+            Công cụ tạo nội dung sẽ sử dụng dữ liệu sản phẩm
+            và kết quả phân tích bài viết đối thủ.
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="settings">
+        <h1 class="page-title">Cài đặt</h1>
+        <p class="subtitle">Cấu hình hoạt động của hệ thống.</p>
+        <div class="card">
+          <h3 class="panel-title">Cấu hình hiện tại</h3>
+          <p>Chu kỳ thu thập: 6 giờ</p>
+          <p>Ngôn ngữ: Tiếng Việt</p>
+          <p>Múi giờ: Asia/Ho_Chi_Minh</p>
+          <p>Số bài viết mỗi lần tạo: 1</p>
+          <p>Tự động đăng Facebook: Không</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const navItems = document.querySelectorAll(".nav-item");
+  const pages = document.querySelectorAll(".page");
+  const topTitle = document.getElementById("topTitle");
+  const sidebar = document.getElementById("sidebar");
+
+  navItems.forEach(item => {
+    item.addEventListener("click", () => {
+      const pageId = item.dataset.page;
+
+      navItems.forEach(nav => nav.classList.remove("active"));
+      pages.forEach(page => page.classList.remove("active"));
+
+      item.classList.add("active");
+      document.getElementById(pageId).classList.add("active");
+      topTitle.textContent = item.textContent.trim();
+
+      sidebar.classList.remove("open");
+    });
+  });
+
+  document.getElementById("mobileMenu").addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+  });
+</script>
+</body>
+</html>
