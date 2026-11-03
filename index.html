@@ -381,6 +381,70 @@
     <p id="apiMessage" class="stat-note" aria-live="polite"></p>
   </div>
 
+        <div class="card" style="margin-top:20px">
+          <h3 class="panel-title">Thêm đối thủ cạnh tranh</h3>
+
+          <form id="competitorForm">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px">
+
+              <div>
+                <label for="competitorName">Tên đối thủ *</label>
+                <input id="competitorName" type="text" required
+                  placeholder="Ví dụ: Shop ABC"
+                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+              </div>
+
+              <div>
+                <label for="competitorUrl">Đường dẫn Facebook *</label>
+                <input id="competitorUrl" type="url" required
+                  placeholder="https://www.facebook.com/..."
+                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+              </div>
+
+              <div>
+                <label for="competitorType">Loại nguồn *</label>
+                <select id="competitorType" required
+                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+                  <option value="PAGE">Fanpage</option>
+                  <option value="PROFILE">Tài khoản cá nhân</option>
+                  <option value="GROUP">Nhóm Facebook</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="competitorIndustry">Ngành nghề</label>
+                <input id="competitorIndustry" type="text"
+                  placeholder="Ví dụ: Bán lẻ"
+                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+              </div>
+
+              <div>
+                <label for="competitorCategory">Danh mục sản phẩm</label>
+                <input id="competitorCategory" type="text"
+                  placeholder="Ví dụ: Đồ gia dụng"
+                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+              </div>
+
+              <div>
+                <label for="competitorMethod">Phương thức thu thập</label>
+                <select id="competitorMethod"
+                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+                  <option value="MANUAL">Thủ công</option>
+                  <option value="API">API có quyền truy cập</option>
+                  <option value="BOTH">Kết hợp</option>
+                </select>
+              </div>
+
+            </div>
+
+            <button type="submit"
+              style="margin-top:18px;padding:12px 22px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
+              + Thêm đối thủ
+            </button>
+
+            <p id="createMessage" class="stat-note" aria-live="polite"></p>
+          </form>
+        </div>
   <div class="card" style="margin-top:20px">
     <h3 class="panel-title">Danh sách đối thủ</h3>
 
@@ -587,6 +651,69 @@
 
     adminToken = token;
     await loadCompetitors();
+  });
+  
+  const competitorForm = document.getElementById("competitorForm");
+  const createMessage = document.getElementById("createMessage");
+
+  competitorForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!adminToken) {
+      createMessage.textContent =
+        "Vui lòng kết nối API trước khi thêm đối thủ.";
+      return;
+    }
+
+    const data = {
+      name: document.getElementById("competitorName").value.trim(),
+      facebook_url: document.getElementById("competitorUrl").value.trim(),
+      source_type: document.getElementById("competitorType").value,
+      industry: document.getElementById("competitorIndustry").value.trim() || null,
+      product_category: document.getElementById("competitorCategory").value.trim() || null,
+      collection_method: document.getElementById("competitorMethod").value,
+      status: "ACTIVE"
+    };
+
+    const submitButton = competitorForm.querySelector(
+      'button[type="submit"]'
+    );
+
+    submitButton.disabled = true;
+    createMessage.textContent = "Đang lưu đối thủ vào D1...";
+
+    try {
+      const response = await fetch(
+        API_BASE + "/api/competitors",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + adminToken
+          },
+          body: JSON.stringify(data)
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Không thể thêm đối thủ");
+      }
+
+      createMessage.textContent =
+        "Đã thêm đối thủ thành công vào cơ sở dữ liệu.";
+
+      competitorForm.reset();
+
+      await loadCompetitors();
+
+    } catch (error) {
+      createMessage.textContent =
+        "Lỗi: " + error.message;
+    } finally {
+      submitButton.disabled = false;
+    }
   });
 </script>
 </body>
