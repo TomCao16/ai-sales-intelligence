@@ -530,7 +530,54 @@
         </div>
   <div class="card" style="margin-top:20px">
     <h3 class="panel-title">Danh sách đối thủ</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px">
 
+  <div>
+    <label for="competitorSearch">Tìm kiếm đối thủ</label>
+    <input
+      id="competitorSearch"
+      type="search"
+      placeholder="Nhập tên, Facebook, ngành nghề..."
+      style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px"
+    >
+  </div>
+
+  <div>
+    <label for="filterCompetitorType">Lọc theo loại nguồn</label>
+    <select
+      id="filterCompetitorType"
+      style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px"
+    >
+      <option value="">Tất cả loại nguồn</option>
+      <option value="PAGE">Fanpage</option>
+      <option value="PROFILE">Tài khoản cá nhân</option>
+      <option value="GROUP">Nhóm Facebook</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="filterCompetitorStatus">Lọc theo trạng thái</label>
+    <select
+      id="filterCompetitorStatus"
+      style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px"
+    >
+      <option value="">Tất cả trạng thái</option>
+      <option value="ACTIVE">Đang hoạt động</option>
+      <option value="PAUSED">Tạm dừng</option>
+      <option value="NEEDS_PERMISSION">Cần cấp quyền</option>
+      <option value="ERROR">Có lỗi</option>
+    </select>
+  </div>
+
+</div>
+
+<button
+  type="button"
+  id="clearCompetitorFilters"
+  style="padding:9px 16px;background:#e9edf3;color:#333;border:0;border-radius:7px;cursor:pointer;margin-bottom:15px"
+>
+  Xóa bộ lọc
+</button>
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;text-align:left">
                <thead>
@@ -645,8 +692,146 @@
   const apiMessage = document.getElementById("apiMessage");
   const competitorList = document.getElementById("competitorList");
   const competitorCount = document.getElementById("competitorCount");
+  document.getElementById("competitorSearch")
+    .addEventListener("input", renderCompetitors);
 
+  document.getElementById("filterCompetitorType")
+    .addEventListener("change", renderCompetitors);
+
+  document.getElementById("filterCompetitorStatus")
+    .addEventListener("change", renderCompetitors);
+
+  document.getElementById("clearCompetitorFilters")
+    .addEventListener("click", () => {
+      document.getElementById("competitorSearch").value = "";
+      document.getElementById("filterCompetitorType").value = "";
+      document.getElementById("filterCompetitorStatus").value = "";
+
+      renderCompetitors();
+    });
     let competitorsCache = [];
+  let competitorsTotal = 0;
+  function renderCompetitors() {
+    const searchInput =
+      document.getElementById("competitorSearch");
+
+    const typeFilter =
+      document.getElementById("filterCompetitorType");
+
+    const statusFilter =
+      document.getElementById("filterCompetitorStatus");
+
+    const keyword = searchInput.value
+      .trim()
+      .toLowerCase();
+
+    const selectedType = typeFilter.value;
+    const selectedStatus = statusFilter.value;
+
+    const filtered = competitorsCache.filter(item => {
+      const searchableText = [
+        item.name,
+        item.facebook_url,
+        item.industry,
+        item.product_category
+      ].join(" ").toLowerCase();
+
+      const matchesKeyword =
+        !keyword || searchableText.includes(keyword);
+
+      const matchesType =
+        !selectedType || item.source_type === selectedType;
+
+      const matchesStatus =
+        !selectedStatus || item.status === selectedStatus;
+
+      return matchesKeyword && matchesType && matchesStatus;
+    });
+
+    competitorList.replaceChildren();
+
+    if (filtered.length === 0) {
+      const row = document.createElement("tr");
+      const cell = document.createElement("td");
+
+      cell.colSpan = 5;
+      cell.textContent = competitorsCache.length === 0
+        ? "Chưa có đối thủ cạnh tranh nào."
+        : "Không tìm thấy đối thủ phù hợp.";
+
+      cell.style.cssText =
+        "padding:25px;text-align:center;color:#788496";
+
+      row.appendChild(cell);
+      competitorList.appendChild(row);
+    }
+
+    filtered.forEach(item => {
+      const row = document.createElement("tr");
+
+      const values = [
+        item.name,
+        item.source_type,
+        item.facebook_url,
+        item.status
+      ];
+
+      values.forEach((value, index) => {
+        const cell = document.createElement("td");
+
+        cell.style.cssText =
+          "padding:12px;border-bottom:1px solid #eee";
+
+        if (index === 2) {
+          const link = document.createElement("a");
+          link.href = value;
+          link.textContent = "Mở Facebook";
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          cell.appendChild(link);
+        } else {
+          cell.textContent = value || "";
+        }
+
+        row.appendChild(cell);
+      });
+
+      const actionCell = document.createElement("td");
+
+      actionCell.style.cssText =
+        "padding:12px;border-bottom:1px solid #eee";
+
+      const editButton = document.createElement("button");
+      editButton.type = "button";
+      editButton.textContent = "Sửa";
+      editButton.dataset.action = "edit";
+      editButton.dataset.id = item.id;
+
+      editButton.style.cssText =
+        "padding:7px 14px;background:#6658e8;color:white;border:0;border-radius:6px;cursor:pointer";
+
+      actionCell.appendChild(editButton);
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.textContent = "Xóa";
+      deleteButton.dataset.action = "delete";
+      deleteButton.dataset.id = item.id;
+
+      deleteButton.style.cssText =
+        "padding:7px 14px;margin-left:7px;background:#dc3545;color:white;border:0;border-radius:6px;cursor:pointer";
+
+      actionCell.appendChild(deleteButton);
+
+      row.appendChild(actionCell);
+      competitorList.appendChild(row);
+    });
+
+    competitorCount.textContent =
+      "Đang hiển thị " + filtered.length +
+      " / " + competitorsTotal + " đối thủ.";
+  }
+
 
   async function loadCompetitors() {
     apiMessage.textContent = "Đang kết nối và tải dữ liệu...";
@@ -669,92 +854,23 @@
       }
 
       competitorsCache = result.data || [];
-      competitorList.replaceChildren();
+      competitorsTotal = Number(result.total) || competitorsCache.length;
 
-      if (competitorsCache.length === 0) {
-        const row = document.createElement("tr");
-        const cell = document.createElement("td");
-
-        cell.colSpan = 5;
-        cell.textContent = "Chưa có đối thủ cạnh tranh nào.";
-        cell.style.cssText =
-          "padding:25px;text-align:center;color:#788496";
-
-        row.appendChild(cell);
-        competitorList.appendChild(row);
-      }
-
-      competitorsCache.forEach(item => {
-        const row = document.createElement("tr");
-
-        const values = [
-          item.name,
-          item.source_type,
-          item.facebook_url,
-          item.status
-        ];
-
-        values.forEach((value, index) => {
-          const cell = document.createElement("td");
-
-          cell.style.cssText =
-            "padding:12px;border-bottom:1px solid #eee";
-
-          if (index === 2) {
-            const link = document.createElement("a");
-            link.href = value;
-            link.textContent = "Mở Facebook";
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            cell.appendChild(link);
-          } else {
-            cell.textContent = value || "";
-          }
-
-          row.appendChild(cell);
-        });
-
-        const actionCell = document.createElement("td");
-        actionCell.style.cssText =
-          "padding:12px;border-bottom:1px solid #eee";
-
-        const editButton = document.createElement("button");
-        editButton.type = "button";
-        editButton.textContent = "Sửa";
-        editButton.dataset.action = "edit";
-        editButton.dataset.id = item.id;
-
-        editButton.style.cssText =
-          "padding:7px 14px;background:#6658e8;color:white;border:0;border-radius:6px;cursor:pointer";
-
-                actionCell.appendChild(editButton);
-
-        const deleteButton = document.createElement("button");
-        deleteButton.type = "button";
-        deleteButton.textContent = "Xóa";
-        deleteButton.dataset.action = "delete";
-        deleteButton.dataset.id = item.id;
-
-        deleteButton.style.cssText =
-          "padding:7px 14px;margin-left:7px;background:#dc3545;color:white;border:0;border-radius:6px;cursor:pointer";
-
-        actionCell.appendChild(deleteButton);
-
-        row.appendChild(actionCell);
-        competitorList.appendChild(row);
-      });
-
-      competitorCount.textContent =
-        "Tổng số đối thủ: " + result.total;
+      renderCompetitors();
 
       apiMessage.textContent =
         "Kết nối thành công. Đã tải dữ liệu từ D1.";
 
     } catch (error) {
       apiMessage.textContent = "Lỗi: " + error.message;
+
+      competitorsCache = [];
+      competitorsTotal = 0;
+
       competitorList.replaceChildren();
       competitorCount.textContent = "";
     }
+  }
   }
   const editCard = document.getElementById("editCompetitorCard");
   const editForm = document.getElementById("editCompetitorForm");
