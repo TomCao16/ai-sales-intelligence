@@ -380,7 +380,90 @@
 
     <p id="apiMessage" class="stat-note" aria-live="polite"></p>
   </div>
+  <div class="card" id="editCompetitorCard"
+       style="margin-top:20px" hidden>
 
+    <h3 class="panel-title">Chỉnh sửa đối thủ cạnh tranh</h3>
+
+    <form id="editCompetitorForm">
+      <input type="hidden" id="editCompetitorId">
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px">
+
+        <div>
+          <label for="editCompetitorName">Tên đối thủ *</label>
+          <input id="editCompetitorName" type="text" required
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        </div>
+
+        <div>
+          <label for="editCompetitorUrl">Đường dẫn Facebook *</label>
+          <input id="editCompetitorUrl" type="url" required
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        </div>
+
+        <div>
+          <label for="editCompetitorType">Loại nguồn *</label>
+          <select id="editCompetitorType" required
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+            <option value="PAGE">Fanpage</option>
+            <option value="PROFILE">Tài khoản cá nhân</option>
+            <option value="GROUP">Nhóm Facebook</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="editCompetitorIndustry">Ngành nghề</label>
+          <input id="editCompetitorIndustry" type="text"
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        </div>
+
+        <div>
+          <label for="editCompetitorCategory">Danh mục sản phẩm</label>
+          <input id="editCompetitorCategory" type="text"
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        </div>
+
+        <div>
+          <label for="editCompetitorMethod">Phương thức thu thập</label>
+          <select id="editCompetitorMethod"
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+            <option value="MANUAL">Thủ công</option>
+            <option value="API">API có quyền truy cập</option>
+            <option value="BOTH">Kết hợp</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="editCompetitorStatus">Trạng thái</label>
+          <select id="editCompetitorStatus"
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+            <option value="ACTIVE">Đang hoạt động</option>
+            <option value="PAUSED">Tạm dừng</option>
+            <option value="NEEDS_PERMISSION">Cần cấp quyền</option>
+            <option value="ERROR">Có lỗi</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+
+        <button type="submit"
+          style="padding:12px 22px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
+          Lưu thay đổi
+        </button>
+
+        <button type="button" id="cancelEdit"
+          style="padding:12px 22px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
+          Hủy
+        </button>
+
+      </div>
+
+      <p id="editMessage" class="stat-note" aria-live="polite"></p>
+    </form>
+  </div>
         <div class="card" style="margin-top:20px">
           <h3 class="panel-title">Thêm đối thủ cạnh tranh</h3>
 
@@ -450,17 +533,18 @@
 
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;text-align:left">
-        <thead>
+               <thead>
           <tr>
             <th style="padding:12px;border-bottom:1px solid #eee">Tên</th>
             <th style="padding:12px;border-bottom:1px solid #eee">Loại nguồn</th>
             <th style="padding:12px;border-bottom:1px solid #eee">Đường dẫn</th>
             <th style="padding:12px;border-bottom:1px solid #eee">Trạng thái</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Thao tác</th>
           </tr>
         </thead>
         <tbody id="competitorList">
           <tr>
-            <td colspan="4" style="padding:25px;text-align:center;color:#788496">
+            <td colspan="5" style="padding:25px;text-align:center;color:#788496">
               Chưa tải dữ liệu
             </td>
           </tr>
@@ -562,6 +646,8 @@
   const competitorList = document.getElementById("competitorList");
   const competitorCount = document.getElementById("competitorCount");
 
+    let competitorsCache = [];
+
   async function loadCompetitors() {
     apiMessage.textContent = "Đang kết nối và tải dữ liệu...";
 
@@ -582,13 +668,14 @@
         throw new Error(result.error || "Không thể tải dữ liệu");
       }
 
+      competitorsCache = result.data || [];
       competitorList.replaceChildren();
 
-      if (result.data.length === 0) {
+      if (competitorsCache.length === 0) {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
 
-        cell.colSpan = 4;
+        cell.colSpan = 5;
         cell.textContent = "Chưa có đối thủ cạnh tranh nào.";
         cell.style.cssText =
           "padding:25px;text-align:center;color:#788496";
@@ -597,7 +684,7 @@
         competitorList.appendChild(row);
       }
 
-      result.data.forEach(item => {
+      competitorsCache.forEach(item => {
         const row = document.createElement("tr");
 
         const values = [
@@ -609,6 +696,7 @@
 
         values.forEach((value, index) => {
           const cell = document.createElement("td");
+
           cell.style.cssText =
             "padding:12px;border-bottom:1px solid #eee";
 
@@ -626,13 +714,30 @@
           row.appendChild(cell);
         });
 
+        const actionCell = document.createElement("td");
+        actionCell.style.cssText =
+          "padding:12px;border-bottom:1px solid #eee";
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.textContent = "Sửa";
+        editButton.dataset.action = "edit";
+        editButton.dataset.id = item.id;
+
+        editButton.style.cssText =
+          "padding:7px 14px;background:#6658e8;color:white;border:0;border-radius:6px;cursor:pointer";
+
+        actionCell.appendChild(editButton);
+        row.appendChild(actionCell);
+
         competitorList.appendChild(row);
       });
 
       competitorCount.textContent =
         "Tổng số đối thủ: " + result.total;
 
-      apiMessage.textContent = "Kết nối thành công. Đã tải dữ liệu từ D1.";
+      apiMessage.textContent =
+        "Kết nối thành công. Đã tải dữ liệu từ D1.";
 
     } catch (error) {
       apiMessage.textContent = "Lỗi: " + error.message;
@@ -640,7 +745,131 @@
       competitorCount.textContent = "";
     }
   }
+  const editCard = document.getElementById("editCompetitorCard");
+  const editForm = document.getElementById("editCompetitorForm");
+  const editMessage = document.getElementById("editMessage");
 
+  competitorList.addEventListener("click", (event) => {
+    const button = event.target.closest(
+      'button[data-action="edit"]'
+    );
+
+    if (!button) return;
+
+    const competitor = competitorsCache.find(
+      item => String(item.id) === button.dataset.id
+    );
+
+    if (!competitor) {
+      editMessage.textContent =
+        "Không tìm thấy dữ liệu đối thủ.";
+      return;
+    }
+
+    document.getElementById("editCompetitorId").value =
+      competitor.id;
+
+    document.getElementById("editCompetitorName").value =
+      competitor.name || "";
+
+    document.getElementById("editCompetitorUrl").value =
+      competitor.facebook_url || "";
+
+    document.getElementById("editCompetitorType").value =
+      competitor.source_type || "PAGE";
+
+    document.getElementById("editCompetitorIndustry").value =
+      competitor.industry || "";
+
+    document.getElementById("editCompetitorCategory").value =
+      competitor.product_category || "";
+
+    document.getElementById("editCompetitorMethod").value =
+      competitor.collection_method || "MANUAL";
+
+    document.getElementById("editCompetitorStatus").value =
+      competitor.status || "ACTIVE";
+
+    editMessage.textContent = "";
+    editCard.hidden = false;
+
+    editCard.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  });
+
+  document.getElementById("cancelEdit").addEventListener("click", () => {
+    editForm.reset();
+    editCard.hidden = true;
+    editMessage.textContent = "";
+  });
+
+  editForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!adminToken) {
+      editMessage.textContent =
+        "Vui lòng kết nối API trước khi sửa.";
+      return;
+    }
+
+    const id = document.getElementById("editCompetitorId").value;
+
+    const data = {
+      name: document.getElementById("editCompetitorName").value.trim(),
+      facebook_url: document.getElementById("editCompetitorUrl").value.trim(),
+      source_type: document.getElementById("editCompetitorType").value,
+      industry:
+        document.getElementById("editCompetitorIndustry").value.trim() || null,
+      product_category:
+        document.getElementById("editCompetitorCategory").value.trim() || null,
+      collection_method:
+        document.getElementById("editCompetitorMethod").value,
+      status:
+        document.getElementById("editCompetitorStatus").value
+    };
+
+    const saveButton = editForm.querySelector(
+      'button[type="submit"]'
+    );
+
+    saveButton.disabled = true;
+    editMessage.textContent = "Đang cập nhật dữ liệu...";
+
+    try {
+      const response = await fetch(
+        API_BASE + "/api/competitors/" + encodeURIComponent(id),
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + adminToken
+          },
+          body: JSON.stringify(data)
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Không thể cập nhật đối thủ");
+      }
+
+      editMessage.textContent =
+        "Đã cập nhật đối thủ thành công.";
+
+      await loadCompetitors();
+
+      editForm.reset();
+      editCard.hidden = true;
+
+    } catch (error) {
+      editMessage.textContent = "Lỗi: " + error.message;
+    } finally {
+      saveButton.disabled = false;
+    }
+  });
   connectButton.addEventListener("click", async () => {
     const token = tokenInput.value.trim();
 
