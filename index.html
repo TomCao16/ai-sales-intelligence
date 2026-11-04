@@ -605,12 +605,227 @@
 
 
       <section class="page" id="posts">
-        <h1 class="page-title">Bài viết đối thủ</h1>
-        <p class="subtitle">Lưu trữ và theo dõi nội dung từ các nguồn cạnh tranh.</p>
-        <div class="card">
-          <div class="empty">Chưa có bài viết được thu thập.</div>
+  <h1 class="page-title">Bài viết đối thủ</h1>
+  <p class="subtitle">
+    Quản lý bài viết, lưu nội dung và theo dõi hiệu quả tương tác.
+  </p>
+
+  <div class="card">
+    <h3 class="panel-title">Thêm / chỉnh sửa bài viết</h3>
+
+    <form id="postForm">
+      <input type="hidden" id="postId">
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px">
+        <div>
+          <label for="postCompetitor">Đối thủ *</label>
+          <select id="postCompetitor" required
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+            <option value="">Chọn đối thủ</option>
+          </select>
         </div>
-      </section>
+
+        <div>
+          <label for="postPublishedAt">Ngày đăng</label>
+          <input id="postPublishedAt" type="datetime-local"
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        </div>
+
+        <div>
+          <label for="postUrl">Đường dẫn bài viết</label>
+          <input id="postUrl" type="url"
+            placeholder="https://www.facebook.com/..."
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        </div>
+
+        <div>
+          <label for="postStatus">Trạng thái</label>
+          <select id="postStatus"
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+            <option value="NEW">Mới</option>
+            <option value="ANALYZED">Đã phân tích</option>
+            <option value="ARCHIVED">Lưu trữ</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:15px">
+        <label for="postContent">Nội dung bài viết *</label>
+        <textarea id="postContent" required rows="6"
+          placeholder="Dán nội dung bài viết của đối thủ vào đây..."
+          style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;margin-top:6px;resize:vertical"></textarea>
+      </div>
+
+      <div style="margin-top:15px">
+        <label for="postImages">Đường dẫn ảnh (mỗi dòng một URL)</label>
+        <textarea id="postImages" rows="2"
+          placeholder="https://..."
+          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px"></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+        <button type="submit" id="savePostButton"
+          style="padding:12px 22px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
+          Lưu bài viết
+        </button>
+
+        <button type="button" id="cancelPostEdit"
+          style="padding:12px 22px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
+          Làm mới
+        </button>
+      </div>
+
+      <p id="postFormMessage" class="stat-note" aria-live="polite"></p>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h3 class="panel-title">Bộ lọc bài viết</h3>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+      <div>
+        <label for="filterPostCompetitor">Đối thủ</label>
+        <select id="filterPostCompetitor"
+          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+          <option value="">Tất cả đối thủ</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="filterPostStatus">Trạng thái</label>
+        <select id="filterPostStatus"
+          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+          <option value="">Tất cả trạng thái</option>
+          <option value="NEW">Mới</option>
+          <option value="ANALYZED">Đã phân tích</option>
+          <option value="ARCHIVED">Lưu trữ</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="filterPostFrom">Từ ngày</label>
+        <input id="filterPostFrom" type="date"
+          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+      </div>
+
+      <div>
+        <label for="filterPostTo">Đến ngày</label>
+        <input id="filterPostTo" type="date"
+          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+      </div>
+
+      <div>
+        <label for="postKeyword">Từ khóa</label>
+        <input id="postKeyword" type="search"
+          placeholder="Tìm trong nội dung..."
+          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
+      <button type="button" id="filterPostsButton"
+        style="padding:10px 18px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
+        Lọc bài viết
+      </button>
+
+      <button type="button" id="clearPostFilters"
+        style="padding:10px 18px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
+        Xóa bộ lọc
+      </button>
+
+      <button type="button" id="reloadPostsButton"
+        style="padding:10px 18px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
+        Tải lại
+      </button>
+    </div>
+
+    <p id="postsMessage" class="stat-note" aria-live="polite"></p>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h3 class="panel-title">Danh sách bài viết</h3>
+
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;text-align:left;min-width:850px">
+        <thead>
+          <tr>
+            <th style="padding:12px;border-bottom:1px solid #eee">Đối thủ</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Nội dung</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Ngày đăng</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Thích</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Bình luận</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Chia sẻ</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Trạng thái</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="postsList">
+          <tr>
+            <td colspan="8" style="padding:25px;text-align:center;color:#788496">
+              Vui lòng kết nối API để tải bài viết.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p id="postsCount" class="stat-note"></p>
+  </div>
+
+  <div class="card" id="postMetricsCard" style="margin-top:20px" hidden>
+    <h3 class="panel-title">Cập nhật chỉ số tương tác</h3>
+    <p id="metricsPostTitle" class="stat-note"></p>
+
+    <form id="metricsForm">
+      <input type="hidden" id="metricsPostId">
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+        <div>
+          <label for="metricLikes">Lượt thích</label>
+          <input id="metricLikes" type="number" min="0" value="0"
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        </div>
+
+        <div>
+          <label for="metricComments">Bình luận</label>
+          <input id="metricComments" type="number" min="0" value="0"
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        </div>
+
+        <div>
+          <label for="metricShares">Chia sẻ</label>
+          <input id="metricShares" type="number" min="0" value="0"
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        </div>
+
+        <div>
+          <label for="metricFollowers">Người theo dõi</label>
+          <input id="metricFollowers" type="number" min="0"
+            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:15px;flex-wrap:wrap">
+        <button type="submit"
+          style="padding:11px 18px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
+          Lưu chỉ số
+        </button>
+
+        <button type="button" id="closeMetrics"
+          style="padding:11px 18px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
+          Đóng
+        </button>
+      </div>
+
+      <p id="metricsMessage" class="stat-note"></p>
+    </form>
+
+    <h3 class="panel-title" style="margin-top:25px">Lịch sử chỉ số</h3>
+    <div id="metricsHistory" class="stat-note">
+      Chưa tải lịch sử.
+    </div>
+  </div>
+</section>
 
       <section class="page" id="analysis">
         <h1 class="page-title">Phân tích AI</h1>
@@ -1137,6 +1352,631 @@
       submitButton.disabled = false;
     }
   });
+    // ==========================================
+  // QUẢN LÝ BÀI VIẾT ĐỐI THỦ
+  // ==========================================
+
+  const postsList = document.getElementById("postsList");
+  const postsMessage = document.getElementById("postsMessage");
+  const postsCount = document.getElementById("postsCount");
+  const postForm = document.getElementById("postForm");
+  const postFormMessage = document.getElementById("postFormMessage");
+  const postMetricsCard = document.getElementById("postMetricsCard");
+
+  let postsCache = [];
+  let postsTotal = 0;
+  let currentMetricsPost = null;
+
+  function postRequestHeaders(json = false) {
+    const headers = {
+      "Authorization": "Bearer " + adminToken
+    };
+
+    if (json) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    return headers;
+  }
+
+  async function postApi(path, options = {}) {
+    if (!adminToken) {
+      throw new Error("Vui lòng kết nối API trước.");
+    }
+
+    const response = await fetch(API_BASE + path, {
+      ...options,
+      headers: {
+        ...postRequestHeaders(
+          options.body !== undefined
+        ),
+        ...(options.headers || {})
+      }
+    });
+
+    let result;
+
+    try {
+      result = await response.json();
+    } catch {
+      throw new Error("API trả về dữ liệu không hợp lệ.");
+    }
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Yêu cầu API thất bại.");
+    }
+
+    return result;
+  }
+
+  function getPostData(result) {
+    if (Array.isArray(result.data)) return result.data;
+    if (Array.isArray(result.data?.items)) return result.data.items;
+    if (Array.isArray(result.items)) return result.items;
+    return [];
+  }
+
+  function getPostMetrics(post) {
+    const metrics = post.latest_metrics || post.metrics || {};
+
+    return {
+      likes: metrics.likes ?? post.latest_likes ?? post.likes ?? 0,
+      comments: metrics.comments ?? post.latest_comments ?? post.comments ?? 0,
+      shares: metrics.shares ?? post.latest_shares ?? post.shares ?? 0
+    };
+  }
+
+  function formatPostDate(value) {
+    if (!value) return "";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return value;
+
+    return date.toLocaleString("vi-VN");
+  }
+
+  function addPostCell(row, value) {
+    const cell = document.createElement("td");
+
+    cell.style.cssText =
+      "padding:12px;border-bottom:1px solid #eee;vertical-align:top";
+
+    cell.textContent =
+      value === null || value === undefined ? "" : String(value);
+
+    row.appendChild(cell);
+
+    return cell;
+  }
+
+  function populatePostCompetitors() {
+    const formSelect = document.getElementById("postCompetitor");
+    const filterSelect = document.getElementById("filterPostCompetitor");
+
+    const currentFormValue = formSelect.value;
+    const currentFilterValue = filterSelect.value;
+
+    formSelect.replaceChildren();
+    filterSelect.replaceChildren();
+
+    const defaultForm = document.createElement("option");
+    defaultForm.value = "";
+    defaultForm.textContent = "Chọn đối thủ";
+    formSelect.appendChild(defaultForm);
+
+    const defaultFilter = document.createElement("option");
+    defaultFilter.value = "";
+    defaultFilter.textContent = "Tất cả đối thủ";
+    filterSelect.appendChild(defaultFilter);
+
+    competitorsCache.forEach(item => {
+      const formOption = document.createElement("option");
+      formOption.value = item.id;
+      formOption.textContent = item.name;
+      formSelect.appendChild(formOption);
+
+      const filterOption = document.createElement("option");
+      filterOption.value = item.id;
+      filterOption.textContent = item.name;
+      filterSelect.appendChild(filterOption);
+    });
+
+    formSelect.value = currentFormValue;
+    filterSelect.value = currentFilterValue;
+  }
+
+  function renderPosts() {
+    postsList.replaceChildren();
+
+    if (postsCache.length === 0) {
+      const row = document.createElement("tr");
+      const cell = document.createElement("td");
+
+      cell.colSpan = 8;
+      cell.textContent = "Chưa có bài viết phù hợp.";
+      cell.style.cssText =
+        "padding:25px;text-align:center;color:#788496";
+
+      row.appendChild(cell);
+      postsList.appendChild(row);
+    }
+
+    postsCache.forEach(post => {
+      const row = document.createElement("tr");
+      const metrics = getPostMetrics(post);
+
+      const competitor = competitorsCache.find(
+        item => String(item.id) === String(post.competitor_id)
+      );
+
+      addPostCell(
+        row,
+        post.source_name_snapshot ||
+        competitor?.name ||
+        ("Đối thủ #" + post.competitor_id)
+      );
+
+      const contentCell = document.createElement("td");
+      contentCell.style.cssText =
+        "padding:12px;border-bottom:1px solid #eee;max-width:300px;white-space:normal;word-break:break-word";
+
+      const contentText = document.createElement("div");
+      contentText.textContent = post.content || "";
+      contentText.style.cssText =
+        "display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden";
+
+      contentCell.appendChild(contentText);
+
+      if (post.post_url) {
+        const link = document.createElement("a");
+        link.href = post.post_url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "Mở bài viết";
+        link.style.display = "inline-block";
+        link.style.marginTop = "7px";
+        contentCell.appendChild(link);
+      }
+
+      row.appendChild(contentCell);
+
+      addPostCell(row, formatPostDate(post.published_at));
+      addPostCell(row, metrics.likes);
+      addPostCell(row, metrics.comments);
+      addPostCell(row, metrics.shares);
+      addPostCell(row, post.status || "NEW");
+
+      const actionCell = document.createElement("td");
+      actionCell.style.cssText =
+        "padding:12px;border-bottom:1px solid #eee;white-space:nowrap";
+
+      [
+        ["Sửa", "edit"],
+        ["Chỉ số", "metrics"],
+        ["Xóa", "delete"]
+      ].forEach(([label, action]) => {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.textContent = label;
+        button.dataset.action = action;
+        button.dataset.id = post.id;
+
+        button.style.cssText =
+          "padding:7px 10px;margin:2px;background:" +
+          (action === "delete" ? "#dc3545" : "#6658e8") +
+          ";color:white;border:0;border-radius:6px;cursor:pointer";
+
+        actionCell.appendChild(button);
+      });
+
+      row.appendChild(actionCell);
+      postsList.appendChild(row);
+    });
+
+    postsCount.textContent =
+      "Số bài viết đang tải: " + postsCache.length +
+      " / Tổng số: " + postsTotal;
+  }
+
+  async function loadPosts() {
+    if (!adminToken) {
+      postsMessage.textContent =
+        "Hãy kết nối API trong mục Đối thủ cạnh tranh trước.";
+      return;
+    }
+
+    postsMessage.textContent = "Đang tải bài viết...";
+    postsList.innerHTML =
+      '<tr><td colspan="8" style="padding:20px;text-align:center">Đang tải dữ liệu...</td></tr>';
+
+    try {
+      const params = new URLSearchParams();
+
+      const competitorId =
+        document.getElementById("filterPostCompetitor").value;
+
+      const keyword =
+        document.getElementById("postKeyword").value.trim();
+
+      const status =
+        document.getElementById("filterPostStatus").value;
+
+      const fromDate =
+        document.getElementById("filterPostFrom").value;
+
+      const toDate =
+        document.getElementById("filterPostTo").value;
+
+      if (competitorId) params.set("competitor_id", competitorId);
+      if (keyword) params.set("keyword", keyword);
+      if (status) params.set("status", status);
+      if (fromDate) params.set("from_date", fromDate);
+      if (toDate) params.set("to_date", toDate);
+
+      params.set("limit", "100");
+
+      const result = await postApi(
+        "/api/posts?" + params.toString()
+      );
+
+      postsCache = getPostData(result);
+      postsTotal = Number(result.total ?? result.data?.total ?? postsCache.length);
+
+      renderPosts();
+
+      postsMessage.textContent =
+        "Đã tải dữ liệu bài viết từ Cloudflare D1.";
+
+    } catch (error) {
+      postsCache = [];
+      postsTotal = 0;
+      renderPosts();
+
+      postsMessage.textContent =
+        "Lỗi tải bài viết: " + error.message;
+    }
+  }
+
+  function resetPostForm() {
+    postForm.reset();
+    document.getElementById("postId").value = "";
+    document.getElementById("savePostButton").textContent = "Lưu bài viết";
+    postFormMessage.textContent = "";
+  }
+
+  function editPost(post) {
+    document.getElementById("postId").value = post.id;
+    document.getElementById("postCompetitor").value = post.competitor_id || "";
+    document.getElementById("postPublishedAt").value =
+      post.published_at ? post.published_at.slice(0, 16) : "";
+    document.getElementById("postUrl").value = post.post_url || "";
+    document.getElementById("postContent").value = post.content || "";
+    document.getElementById("postStatus").value = post.status || "NEW";
+
+    let images = [];
+
+    try {
+      images = Array.isArray(post.image_urls)
+        ? post.image_urls
+        : JSON.parse(post.image_urls || "[]");
+    } catch {
+      images = [];
+    }
+
+    document.getElementById("postImages").value =
+      images.join("\n");
+
+    document.getElementById("savePostButton").textContent =
+      "Cập nhật bài viết";
+
+    postFormMessage.textContent =
+      "Đang chỉnh sửa bài viết #" + post.id;
+
+    postForm.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+
+  postForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!adminToken) {
+      postFormMessage.textContent =
+        "Vui lòng kết nối API trước.";
+      return;
+    }
+
+    const id = document.getElementById("postId").value;
+
+    const imageUrls = document.getElementById("postImages")
+      .value.split("\n")
+      .map(value => value.trim())
+      .filter(Boolean);
+
+    const data = {
+      competitor_id: Number(
+        document.getElementById("postCompetitor").value
+      ),
+      content: document.getElementById("postContent").value.trim(),
+      post_url: document.getElementById("postUrl").value.trim() || null,
+      published_at:
+        document.getElementById("postPublishedAt").value || null,
+      image_urls: imageUrls,
+      status: document.getElementById("postStatus").value,
+      collection_method: "MANUAL"
+    };
+
+    const button = document.getElementById("savePostButton");
+    button.disabled = true;
+    postFormMessage.textContent = "Đang lưu bài viết...";
+
+    try {
+      const result = await postApi(
+        id
+          ? "/api/posts/" + encodeURIComponent(id)
+          : "/api/posts",
+        {
+          method: id ? "PATCH" : "POST",
+          body: JSON.stringify(data)
+        }
+      );
+
+      postFormMessage.textContent =
+        id ? "Đã cập nhật bài viết." : "Đã thêm bài viết.";
+
+      resetPostForm();
+      await loadPosts();
+
+    } catch (error) {
+      postFormMessage.textContent =
+        "Lỗi lưu bài viết: " + error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById("cancelPostEdit")
+    .addEventListener("click", resetPostForm);
+
+  postsList.addEventListener("click", async event => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+
+    const id = button.dataset.id;
+    const action = button.dataset.action;
+
+    const post = postsCache.find(
+      item => String(item.id) === String(id)
+    );
+
+    if (!post) return;
+
+    if (action === "edit") {
+      editPost(post);
+      return;
+    }
+
+    if (action === "delete") {
+      if (!window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) {
+        return;
+      }
+
+      button.disabled = true;
+
+      try {
+        await postApi(
+          "/api/posts/" + encodeURIComponent(id),
+          { method: "DELETE" }
+        );
+
+        postsMessage.textContent = "Đã xóa bài viết.";
+        await loadPosts();
+
+      } catch (error) {
+        postsMessage.textContent =
+          "Lỗi xóa bài viết: " + error.message;
+        button.disabled = false;
+      }
+
+      return;
+    }
+
+    if (action === "metrics") {
+      openPostMetrics(post);
+    }
+  });
+
+  async function openPostMetrics(post) {
+    currentMetricsPost = post;
+
+    document.getElementById("metricsPostId").value = post.id;
+    document.getElementById("metricsPostTitle").textContent =
+      "Bài viết #" + post.id + ": " +
+      (post.content || "").slice(0, 150);
+
+    const metrics = getPostMetrics(post);
+
+    document.getElementById("metricLikes").value = metrics.likes;
+    document.getElementById("metricComments").value = metrics.comments;
+    document.getElementById("metricShares").value = metrics.shares;
+
+    document.getElementById("metricFollowers").value =
+      post.latest_metrics?.followers ?? post.followers ?? "";
+
+    document.getElementById("metricsMessage").textContent =
+      "Đang tải lịch sử chỉ số...";
+
+    document.getElementById("metricsHistory").textContent =
+      "Đang tải...";
+
+    postMetricsCard.hidden = false;
+
+    postMetricsCard.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+
+    await loadMetricsHistory(post.id);
+  }
+
+  async function loadMetricsHistory(postId) {
+    try {
+      const result = await postApi(
+        "/api/posts/" + encodeURIComponent(postId) + "/metrics"
+      );
+
+      const records = getPostData(result);
+      const history = document.getElementById("metricsHistory");
+
+      history.replaceChildren();
+
+      if (records.length === 0) {
+        history.textContent = "Chưa có lịch sử chỉ số.";
+        return;
+      }
+
+      const table = document.createElement("table");
+      table.style.cssText =
+        "width:100%;border-collapse:collapse;text-align:left";
+
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+
+      ["Thời gian", "Thích", "Bình luận", "Chia sẻ", "Người theo dõi"]
+        .forEach(label => {
+          const th = document.createElement("th");
+          th.textContent = label;
+          th.style.cssText =
+            "padding:9px;border-bottom:1px solid #eee";
+          headerRow.appendChild(th);
+        });
+
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
+      records.forEach(record => {
+        const row = document.createElement("tr");
+
+        [
+          formatPostDate(record.captured_at),
+          record.likes ?? 0,
+          record.comments ?? 0,
+          record.shares ?? 0,
+          record.followers ?? ""
+        ].forEach(value => {
+          const cell = document.createElement("td");
+          cell.textContent = value;
+          cell.style.cssText =
+            "padding:9px;border-bottom:1px solid #eee";
+          row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
+      });
+
+      table.appendChild(tbody);
+      history.appendChild(table);
+
+      document.getElementById("metricsMessage").textContent =
+        "Đã tải " + records.length + " bản ghi lịch sử.";
+
+    } catch (error) {
+      document.getElementById("metricsHistory").textContent =
+        "Không tải được lịch sử: " + error.message;
+    }
+  }
+
+  document.getElementById("metricsForm")
+    .addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const id = document.getElementById("metricsPostId").value;
+
+      const data = {
+        likes: Number(document.getElementById("metricLikes").value || 0),
+        comments: Number(document.getElementById("metricComments").value || 0),
+        shares: Number(document.getElementById("metricShares").value || 0),
+        followers:
+          document.getElementById("metricFollowers").value === ""
+            ? null
+            : Number(document.getElementById("metricFollowers").value)
+      };
+
+      const message = document.getElementById("metricsMessage");
+      message.textContent = "Đang lưu chỉ số...";
+
+      try {
+        await postApi(
+          "/api/posts/" + encodeURIComponent(id) + "/metrics",
+          {
+            method: "POST",
+            body: JSON.stringify(data)
+          }
+        );
+
+        message.textContent = "Đã lưu chỉ số tương tác.";
+
+        await loadPosts();
+        await loadMetricsHistory(id);
+
+      } catch (error) {
+        message.textContent =
+          "Lỗi lưu chỉ số: " + error.message;
+      }
+    });
+
+  document.getElementById("closeMetrics")
+    .addEventListener("click", () => {
+      postMetricsCard.hidden = true;
+    });
+
+  document.getElementById("filterPostsButton")
+    .addEventListener("click", loadPosts);
+
+  document.getElementById("reloadPostsButton")
+    .addEventListener("click", loadPosts);
+
+  document.getElementById("clearPostFilters")
+    .addEventListener("click", () => {
+      document.getElementById("filterPostCompetitor").value = "";
+      document.getElementById("filterPostStatus").value = "";
+      document.getElementById("filterPostFrom").value = "";
+      document.getElementById("filterPostTo").value = "";
+      document.getElementById("postKeyword").value = "";
+
+      loadPosts();
+    });
+
+  // Đồng bộ danh sách đối thủ sau khi tải dữ liệu thành công.
+  const originalLoadCompetitors = loadCompetitors;
+
+  loadCompetitors = async function() {
+    await originalLoadCompetitors();
+
+    populatePostCompetitors();
+
+    if (adminToken) {
+      loadPosts();
+    }
+  };
+
+  // Khi mở trang Bài viết đối thủ, tự tải dữ liệu.
+  navItems.forEach(item => {
+    item.addEventListener("click", () => {
+      if (item.dataset.page === "posts" && adminToken) {
+        populatePostCompetitors();
+        loadPosts();
+      }
+    });
+  });
+
+  // Khởi tạo danh sách lựa chọn nếu đã có dữ liệu trong bộ nhớ.
+  populatePostCompetitors();
 </script>
 </body>
 </html>
