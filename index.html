@@ -349,619 +349,176 @@
       </section>
 
      
-<section class="page" id="competitors">
-  <h1 class="page-title">Đối thủ cạnh tranh</h1>
-  <p class="subtitle">
-    Quản lý Fanpage, tài khoản cá nhân và nhóm Facebook.
-  </p>
+
+<section class="page" id="products">
+  <h1 class="page-title">Sản phẩm của tôi</h1>
+  <p class="subtitle">Quản lý thông tin sản phẩm phục vụ sáng tạo nội dung bán hàng.</p>
 
   <div class="card">
-    <h3 class="panel-title">Kết nối dữ liệu</h3>
-    <p class="stat-note">
-      Nhập ADMIN_TOKEN đã tạo trong Cloudflare để truy cập dữ liệu.
-      Token chỉ được giữ trong bộ nhớ của trang hiện tại.
-    </p>
+    <h3 class="panel-title" id="productFormTitle">Thêm sản phẩm mới</h3>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
-      <input
-        id="adminToken"
-        type="password"
-        placeholder="Nhập ADMIN_TOKEN"
-        autocomplete="off"
-        style="flex:1;min-width:220px;padding:12px;border:1px solid #ddd;border-radius:8px"
-      >
-      <button
-        id="connectApi"
-        style="padding:12px 20px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer"
-      >
-        Kết nối
-      </button>
-    </div>
+    <form id="productForm">
+      <input type="hidden" id="productId">
 
-    <p id="apiMessage" class="stat-note" aria-live="polite"></p>
-  </div>
-  <div class="card" id="editCompetitorCard"
-       style="margin-top:20px" hidden>
-
-    <h3 class="panel-title">Chỉnh sửa đối thủ cạnh tranh</h3>
-
-    <form id="editCompetitorForm">
-      <input type="hidden" id="editCompetitorId">
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px">
-
-        <div>
-          <label for="editCompetitorName">Tên đối thủ *</label>
-          <input id="editCompetitorName" type="text" required
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="productName">Tên sản phẩm *</label>
+          <input id="productName" required maxlength="300">
         </div>
-
-        <div>
-          <label for="editCompetitorUrl">Đường dẫn Facebook *</label>
-          <input id="editCompetitorUrl" type="url" required
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        <div class="form-group">
+          <label for="productIndustry">Ngành hàng</label>
+          <input id="productIndustry">
         </div>
-
-        <div>
-          <label for="editCompetitorType">Loại nguồn *</label>
-          <select id="editCompetitorType" required
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-            <option value="PAGE">Fanpage</option>
-            <option value="PROFILE">Tài khoản cá nhân</option>
-            <option value="GROUP">Nhóm Facebook</option>
-          </select>
+        <div class="form-group">
+          <label for="productCategory">Danh mục</label>
+          <input id="productCategory">
         </div>
-
-        <div>
-          <label for="editCompetitorIndustry">Ngành nghề</label>
-          <input id="editCompetitorIndustry" type="text"
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        <div class="form-group">
+          <label for="productPrice">Giá bán</label>
+          <input id="productPrice" type="number" min="0" step="any">
         </div>
-
-        <div>
-          <label for="editCompetitorCategory">Danh mục sản phẩm</label>
-          <input id="editCompetitorCategory" type="text"
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
+        <div class="form-group">
+          <label for="productCurrency">Tiền tệ</label>
+          <input id="productCurrency" value="VND">
         </div>
-
-        <div>
-          <label for="editCompetitorMethod">Phương thức thu thập</label>
-          <select id="editCompetitorMethod"
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-            <option value="MANUAL">Thủ công</option>
-            <option value="API">API có quyền truy cập</option>
-            <option value="BOTH">Kết hợp</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="editCompetitorStatus">Trạng thái</label>
-          <select id="editCompetitorStatus"
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-            <option value="ACTIVE">Đang hoạt động</option>
-            <option value="PAUSED">Tạm dừng</option>
-            <option value="NEEDS_PERMISSION">Cần cấp quyền</option>
-            <option value="ERROR">Có lỗi</option>
-          </select>
-        </div>
-
-      </div>
-
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
-
-        <button type="submit"
-          style="padding:12px 22px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
-          Lưu thay đổi
-        </button>
-
-        <button type="button" id="cancelEdit"
-          style="padding:12px 22px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
-          Hủy
-        </button>
-
-      </div>
-
-      <p id="editMessage" class="stat-note" aria-live="polite"></p>
-    </form>
-  </div>
-        <div class="card" style="margin-top:20px">
-          <h3 class="panel-title">Thêm đối thủ cạnh tranh</h3>
-
-          <form id="competitorForm">
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px">
-
-              <div>
-                <label for="competitorName">Tên đối thủ *</label>
-                <input id="competitorName" type="text" required
-                  placeholder="Ví dụ: Shop ABC"
-                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-              </div>
-
-              <div>
-                <label for="competitorUrl">Đường dẫn Facebook *</label>
-                <input id="competitorUrl" type="url" required
-                  placeholder="https://www.facebook.com/..."
-                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-              </div>
-
-              <div>
-                <label for="competitorType">Loại nguồn *</label>
-                <select id="competitorType" required
-                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-                  <option value="PAGE">Fanpage</option>
-                  <option value="PROFILE">Tài khoản cá nhân</option>
-                  <option value="GROUP">Nhóm Facebook</option>
-                </select>
-              </div>
-
-              <div>
-                <label for="competitorIndustry">Ngành nghề</label>
-                <input id="competitorIndustry" type="text"
-                  placeholder="Ví dụ: Bán lẻ"
-                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-              </div>
-
-              <div>
-                <label for="competitorCategory">Danh mục sản phẩm</label>
-                <input id="competitorCategory" type="text"
-                  placeholder="Ví dụ: Đồ gia dụng"
-                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-              </div>
-
-              <div>
-                <label for="competitorMethod">Phương thức thu thập</label>
-                <select id="competitorMethod"
-                  style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-                  <option value="MANUAL">Thủ công</option>
-                  <option value="API">API có quyền truy cập</option>
-                  <option value="BOTH">Kết hợp</option>
-                </select>
-              </div>
-
-            </div>
-
-            <button type="submit"
-              style="margin-top:18px;padding:12px 22px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
-              + Thêm đối thủ
-            </button>
-
-            <p id="createMessage" class="stat-note" aria-live="polite"></p>
-          </form>
-        </div>
-  <div class="card" style="margin-top:20px">
-    <h3 class="panel-title">Danh sách đối thủ</h3>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px">
-
-  <div>
-    <label for="competitorSearch">Tìm kiếm đối thủ</label>
-    <input
-      id="competitorSearch"
-      type="search"
-      placeholder="Nhập tên, Facebook, ngành nghề..."
-      style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px"
-    >
-  </div>
-
-  <div>
-    <label for="filterCompetitorType">Lọc theo loại nguồn</label>
-    <select
-      id="filterCompetitorType"
-      style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px"
-    >
-      <option value="">Tất cả loại nguồn</option>
-      <option value="PAGE">Fanpage</option>
-      <option value="PROFILE">Tài khoản cá nhân</option>
-      <option value="GROUP">Nhóm Facebook</option>
-    </select>
-  </div>
-
-  <div>
-    <label for="filterCompetitorStatus">Lọc theo trạng thái</label>
-    <select
-      id="filterCompetitorStatus"
-      style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px"
-    >
-      <option value="">Tất cả trạng thái</option>
-      <option value="ACTIVE">Đang hoạt động</option>
-      <option value="PAUSED">Tạm dừng</option>
-      <option value="NEEDS_PERMISSION">Cần cấp quyền</option>
-      <option value="ERROR">Có lỗi</option>
-    </select>
-  </div>
-
-</div>
-
-<button
-  type="button"
-  id="clearCompetitorFilters"
-  style="padding:9px 16px;background:#e9edf3;color:#333;border:0;border-radius:7px;cursor:pointer;margin-bottom:15px"
->
-  Xóa bộ lọc
-</button>
-    <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;text-align:left">
-               <thead>
-          <tr>
-            <th style="padding:12px;border-bottom:1px solid #eee">Tên</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Loại nguồn</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Đường dẫn</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Trạng thái</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody id="competitorList">
-          <tr>
-            <td colspan="5" style="padding:25px;text-align:center;color:#788496">
-              Chưa tải dữ liệu
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p id="competitorCount" class="stat-note"></p>
-  </div>
-</section>
-
-
-      <section class="page" id="posts">
-  <h1 class="page-title">Bài viết đối thủ</h1>
-  <p class="subtitle">
-    Quản lý bài viết, lưu nội dung và theo dõi hiệu quả tương tác.
-  </p>
-
-  <div class="card">
-    <h3 class="panel-title">Thêm / chỉnh sửa bài viết</h3>
-
-    <form id="postForm">
-      <input type="hidden" id="postId">
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px">
-        <div>
-          <label for="postCompetitor">Đối thủ *</label>
-          <select id="postCompetitor" required
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-            <option value="">Chọn đối thủ</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="postPublishedAt">Ngày đăng</label>
-          <input id="postPublishedAt" type="datetime-local"
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-        </div>
-
-        <div>
-          <label for="postUrl">Đường dẫn bài viết</label>
-          <input id="postUrl" type="url"
-            placeholder="https://www.facebook.com/..."
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-        </div>
-
-        <div>
-          <label for="postStatus">Trạng thái</label>
-          <select id="postStatus"
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-            <option value="NEW">Mới</option>
-            <option value="ANALYZED">Đã phân tích</option>
-            <option value="ARCHIVED">Lưu trữ</option>
-          </select>
+        <div class="form-group">
+          <label for="productCondition">Tình trạng</label>
+          <input id="productCondition" placeholder="Mới, đã qua sử dụng...">
         </div>
       </div>
 
-      <div style="margin-top:15px">
-        <label for="postContent">Nội dung bài viết *</label>
-        <textarea id="postContent" required rows="6"
-          placeholder="Dán nội dung bài viết của đối thủ vào đây..."
-          style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;margin-top:6px;resize:vertical"></textarea>
+      <div class="form-group">
+        <label for="productDescription">Mô tả sản phẩm</label>
+        <textarea id="productDescription" rows="3"></textarea>
       </div>
 
-      <div style="margin-top:15px">
-        <label for="postImages">Đường dẫn ảnh (mỗi dòng một URL)</label>
-        <textarea id="postImages" rows="2"
-          placeholder="https://..."
-          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px"></textarea>
+      <div class="form-group">
+        <label for="productSpecifications">Thông số / đặc điểm</label>
+        <textarea id="productSpecifications" rows="3"></textarea>
       </div>
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
-        <button type="submit" id="savePostButton"
-          style="padding:12px 22px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
-          Lưu bài viết
-        </button>
-
-        <button type="button" id="cancelPostEdit"
-          style="padding:12px 22px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
-          Làm mới
-        </button>
+      <div class="form-group">
+        <label for="productSellingPoints">Điểm bán hàng nổi bật</label>
+        <textarea id="productSellingPoints" rows="3"></textarea>
       </div>
 
-      <p id="postFormMessage" class="stat-note" aria-live="polite"></p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="productWarranty">Bảo hành</label>
+          <input id="productWarranty">
+        </div>
+        <div class="form-group">
+          <label for="productDelivery">Chính sách giao hàng</label>
+          <input id="productDelivery">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="productPromotion">Khuyến mãi</label>
+        <textarea id="productPromotion" rows="2"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="productImages">Đường dẫn ảnh (mỗi dòng một URL)</label>
+        <textarea id="productImages" rows="2"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="productStatus">Trạng thái</label>
+        <select id="productStatus">
+          <option value="ACTIVE">Đang kinh doanh</option>
+          <option value="INACTIVE">Ngừng kinh doanh</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="submit" id="saveProductButton">Lưu sản phẩm</button>
+        <button type="button" id="cancelProductEdit"
+          style="background:#e9edf3;color:#333" hidden>Hủy chỉnh sửa</button>
+      </div>
+      <p id="productFormMessage" class="stat-note"></p>
     </form>
   </div>
 
   <div class="card" style="margin-top:20px">
-    <h3 class="panel-title">Bộ lọc bài viết</h3>
-
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-      <div>
-        <label for="filterPostCompetitor">Đối thủ</label>
-        <select id="filterPostCompetitor"
-          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-          <option value="">Tất cả đối thủ</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="filterPostStatus">Trạng thái</label>
-        <select id="filterPostStatus"
-          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-          <option value="">Tất cả trạng thái</option>
-          <option value="NEW">Mới</option>
-          <option value="ANALYZED">Đã phân tích</option>
-          <option value="ARCHIVED">Lưu trữ</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="filterPostFrom">Từ ngày</label>
-        <input id="filterPostFrom" type="date"
-          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-      </div>
-
-      <div>
-        <label for="filterPostTo">Đến ngày</label>
-        <input id="filterPostTo" type="date"
-          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-      </div>
-
-      <div>
-        <label for="postKeyword">Từ khóa</label>
-        <input id="postKeyword" type="search"
-          placeholder="Tìm trong nội dung..."
-          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-      </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <h3 class="panel-title">Danh sách sản phẩm</h3>
+      <button type="button" id="reloadProductsButton">Tải lại</button>
     </div>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
-      <button type="button" id="filterPostsButton"
-        style="padding:10px 18px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
-        Lọc bài viết
-      </button>
-
-      <button type="button" id="clearPostFilters"
-        style="padding:10px 18px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
-        Xóa bộ lọc
-      </button>
-
-      <button type="button" id="reloadPostsButton"
-        style="padding:10px 18px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
-        Tải lại
-      </button>
-    </div>
-
-    <p id="postsMessage" class="stat-note" aria-live="polite"></p>
-  </div>
-
-  <div class="card" style="margin-top:20px">
-    <h3 class="panel-title">Danh sách bài viết</h3>
-
+    <p id="productsMessage" class="stat-note"></p>
     <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;text-align:left;min-width:850px">
+      <table style="width:100%;border-collapse:collapse;text-align:left;min-width:750px">
         <thead>
           <tr>
-            <th style="padding:12px;border-bottom:1px solid #eee">Đối thủ</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Nội dung</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Ngày đăng</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Thích</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Bình luận</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Chia sẻ</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Trạng thái</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody id="postsList">
-          <tr>
-            <td colspan="8" style="padding:25px;text-align:center;color:#788496">
-              Vui lòng kết nối API để tải bài viết.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p id="postsCount" class="stat-note"></p>
-  </div>
-
-  <div class="card" id="postMetricsCard" style="margin-top:20px" hidden>
-    <h3 class="panel-title">Cập nhật chỉ số tương tác</h3>
-    <p id="metricsPostTitle" class="stat-note"></p>
-
-    <form id="metricsForm">
-      <input type="hidden" id="metricsPostId">
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
-        <div>
-          <label for="metricLikes">Lượt thích</label>
-          <input id="metricLikes" type="number" min="0" value="0"
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-        </div>
-
-        <div>
-          <label for="metricComments">Bình luận</label>
-          <input id="metricComments" type="number" min="0" value="0"
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-        </div>
-
-        <div>
-          <label for="metricShares">Chia sẻ</label>
-          <input id="metricShares" type="number" min="0" value="0"
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-        </div>
-
-        <div>
-          <label for="metricFollowers">Người theo dõi</label>
-          <input id="metricFollowers" type="number" min="0"
-            style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-        </div>
-      </div>
-
-      <div style="display:flex;gap:10px;margin-top:15px;flex-wrap:wrap">
-        <button type="submit"
-          style="padding:11px 18px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
-          Lưu chỉ số
-        </button>
-
-        <button type="button" id="closeMetrics"
-          style="padding:11px 18px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
-          Đóng
-        </button>
-      </div>
-
-      <p id="metricsMessage" class="stat-note"></p>
-    </form>
-
-    <h3 class="panel-title" style="margin-top:25px">Lịch sử chỉ số</h3>
-    <div id="metricsHistory" class="stat-note">
-      Chưa tải lịch sử.
-    </div>
-  </div>
-</section>
-
-      <section class="page" id="analysis">
-  <h1 class="page-title">Phân tích AI</h1>
-  <p class="subtitle">Tìm hiểu lý do bài viết có hiệu quả cao.</p>
-
-  <div class="card">
-    <h3 class="panel-title">Chạy phân tích bằng Gemini</h3>
-    <p class="stat-note">
-      Hệ thống cần tối thiểu 5 bài viết có nội dung và chỉ số tương tác
-      trong cùng một đối thủ. Mỗi lần chạy tối đa 5 bài.
-    </p>
-
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:15px">
-      <div>
-        <label for="analysisCompetitor">Phạm vi phân tích</label>
-        <select id="analysisCompetitor"
-          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-          <option value="">Tất cả đối thủ</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="analysisLimit">Số bài tối đa mỗi lần chạy</label>
-        <select id="analysisLimit"
-          style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;margin-top:6px">
-          <option value="1">1 bài</option>
-          <option value="2">2 bài</option>
-          <option value="3">3 bài</option>
-          <option value="4">4 bài</option>
-          <option value="5" selected>5 bài</option>
-        </select>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
-      <button type="button" id="runAnalysisButton"
-        style="padding:12px 20px;background:#6658e8;color:white;border:0;border-radius:8px;cursor:pointer">
-        ✦ Chạy phân tích AI
-      </button>
-
-      <button type="button" id="reloadAnalysisButton"
-        style="padding:12px 20px;background:#e9edf3;color:#333;border:0;border-radius:8px;cursor:pointer">
-        Tải lịch sử
-      </button>
-    </div>
-
-    <p id="analysisMessage" class="stat-note" aria-live="polite"></p>
-    <div id="analysisRunSummary" style="margin-top:12px"></div>
-  </div>
-
-  <div class="stats" style="margin-top:20px">
-    <div class="card">
-      <div class="stat-label">Lượt phân tích đã lưu</div>
-      <div class="stat-value" id="analysisTotalCount">0</div>
-      <div class="stat-note">Tổng bản ghi lịch sử đang tải</div>
-    </div>
-
-    <div class="card">
-      <div class="stat-label">Điểm chất lượng trung bình</div>
-      <div class="stat-value" id="analysisAverageScore">—</div>
-      <div class="stat-note">Trên thang điểm 100</div>
-    </div>
-
-    <div class="card">
-      <div class="stat-label">Đối thủ trong bộ lọc</div>
-      <div class="stat-value" id="analysisCompetitorCount">0</div>
-      <div class="stat-note">Đối thủ có kết quả phân tích</div>
-    </div>
-
-    <div class="card">
-      <div class="stat-label">Bài viết đang hiển thị</div>
-      <div class="stat-value" id="analysisPostCount">0</div>
-      <div class="stat-note">Bản ghi phân tích trong danh sách</div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:20px">
-    <h3 class="panel-title">Lịch sử phân tích</h3>
-
-    <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;text-align:left;min-width:850px">
-        <thead>
-          <tr>
-            <th style="padding:12px;border-bottom:1px solid #eee">Đối thủ / Bài viết</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Xếp hạng</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Điểm nội dung</th>
             <th style="padding:12px;border-bottom:1px solid #eee">Sản phẩm</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Chiến lược</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Thời gian phân tích</th>
-            <th style="padding:12px;border-bottom:1px solid #eee">Chi tiết</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Giá</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Trạng thái</th>
+            <th style="padding:12px;border-bottom:1px solid #eee">Thao tác</th>
           </tr>
         </thead>
-        <tbody id="analysisList">
-          <tr>
-            <td colspan="7" style="padding:25px;text-align:center;color:#788496">
-              Vui lòng kết nối API để tải lịch sử phân tích.
-            </td>
-          </tr>
+        <tbody id="productsList">
+          <tr><td colspan="4" style="padding:20px;text-align:center">Vui lòng kết nối API để tải sản phẩm.</td></tr>
         </tbody>
       </table>
     </div>
-
-    <p id="analysisCount" class="stat-note"></p>
-  </div>
-
-  <div class="card" id="analysisDetailCard" style="margin-top:20px" hidden>
-    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
-      <h3 class="panel-title" style="margin:0">Chi tiết phân tích</h3>
-      <button type="button" id="closeAnalysisDetail"
-        style="padding:8px 14px;background:#e9edf3;color:#333;border:0;border-radius:7px;cursor:pointer">
-        Đóng
-      </button>
-    </div>
-
-    <div id="analysisDetailContent" style="margin-top:15px;line-height:1.7"></div>
+    <p id="productsCount" class="stat-note"></p>
   </div>
 </section>
 
-      <section class="page" id="products">
-        <h1 class="page-title">Sản phẩm của tôi</h1>
-        <p class="subtitle">Quản lý thông tin sản phẩm phục vụ sáng tạo nội dung.</p>
-        <div class="card">
-          <div class="empty">Chưa có sản phẩm. Chức năng quản lý sản phẩm sẽ được kết nối sau.</div>
-        </div>
-      </section>
+<section class="page" id="generator">
+  <h1 class="page-title">Tạo nội dung AI</h1>
+  <p class="subtitle">Tạo bài viết bán hàng Facebook dựa trên dữ liệu sản phẩm và phân tích đối thủ.</p>
 
-      <section class="page" id="generator">
-        <h1 class="page-title">Tạo nội dung AI</h1>
-        <p class="subtitle">Sáng tạo nội dung bán hàng bằng tiếng Việt.</p>
-        <div class="card">
-          <div class="empty">
-            Công cụ tạo nội dung sẽ sử dụng dữ liệu sản phẩm
-            và kết quả phân tích bài viết đối thủ.
-          </div>
-        </div>
-      </section>
+  <div class="card">
+    <h3 class="panel-title">Thông tin tạo nội dung</h3>
+    <form id="generatorForm">
+      <div class="form-group">
+        <label for="generationProduct">Chọn sản phẩm *</label>
+        <select id="generationProduct" required>
+          <option value="">Đang tải sản phẩm...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="generationAnalysis">Phân tích bài viết đối thủ (không bắt buộc)</label>
+        <select id="generationAnalysis">
+          <option value="">Không sử dụng phân tích đối thủ</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="generationStyle">Phong cách viết</label>
+        <select id="generationStyle">
+          <option>Tự nhiên, gần gũi, thuyết phục</option>
+          <option>Ngắn gọn, mạnh mẽ, tập trung chốt đơn</option>
+          <option>Chuyên nghiệp, đáng tin cậy</option>
+          <option>Thân thiện, hài hước, tạo tương tác</option>
+          <option>Sang trọng, cao cấp</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="generationRequest">Yêu cầu bổ sung</label>
+        <textarea id="generationRequest" rows="4"
+          placeholder="Ví dụ: Viết ngắn gọn, nhấn mạnh lợi ích thực tế, có lời kêu gọi nhắn tin..."></textarea>
+      </div>
+
+      <button type="submit" id="generateContentButton">✦ Tạo bài viết bằng AI</button>
+      <p id="generatorMessage" class="stat-note"></p>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <h3 class="panel-title">Lịch sử nội dung đã tạo</h3>
+      <button type="button" id="reloadGeneratedPostsButton">Tải lịch sử</button>
+    </div>
+    <p id="generatedPostsMessage" class="stat-note"></p>
+    <div id="generatedPostsList">
+      <div class="empty">Vui lòng kết nối API để tải lịch sử nội dung.</div>
+    </div>
+  </div>
+</section>
 
       <section class="page" id="settings">
         <h1 class="page-title">Cài đặt</h1>
