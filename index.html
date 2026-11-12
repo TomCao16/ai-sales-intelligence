@@ -2134,6 +2134,606 @@
       }
     });
   });
+  
+/* =====================================================
+   PRODUCTS + AI CONTENT GENERATOR
+   Tích hợp với API hiện có — không thay đổi Worker
+===================================================== */
+(() => {
+  const $ = id => document.getElementById(id);
+
+  let productsCache = [];
+  let generatedPostsCache = [];
+
+  function showMessage(id, message, isError = false) {
+    const el = $(id);
+    if (!el) return;
+    el.textContent = message;
+    el.style.color = isError ? "#dc3545" : "#198754";
+  }
+
+  function money(value, currency = "VND") {
+    if (value === null || value === undefined || value === "") {
+      return "Chưa có giá";
+    }
+
+    return Number(value).toLocaleString("vi-VN") + " " + currency;
+  }
+
+  function productFormData() {
+    const priceValue = $("productPrice").value.trim();
+
+    return {
+      name: $("productName").value.trim(),
+      industry: $("productIndustry").value.trim() || null,
+      category: $("productCategory").value.trim() || null,
+      price: priceValue === "" ? null : Number(priceValue),
+      currency: $("productCurrency").value.trim() || "VND",
+      condition: $("productCondition").value.trim() || null,
+      description: $("productDescription").value.trim() || null,
+      specifications: $("productSpecifications").value.trim() || null,
+      selling_points: $("productSellingPoints").value.trim() || null,
+      warranty: $("productWarranty").value.trim() || null,
+      delivery_policy: $("productDelivery").value.trim() || null,
+      promotion: $("productPromotion").value.trim() || null,
+      image_urls: $("productImages").value
+        .split("\n")
+        .map(value => value.trim())
+        .filter(Boolean),
+      status: $("productStatus").value
+    };
+  }
+
+  function resetProductForm() {
+    $("productForm").reset();
+    $("productId").value = "";
+    $("productCurrency").value = "VND";
+    $("productStatus").value = "ACTIVE";
+    $("productFormTitle").textContent = "Thêm sản phẩm mới";
+    $("saveProductButton").textContent = "Lưu sản phẩm";
+    $("cancelProductEdit").hidden = true;
+    showMessage("productFormMessage", "");
+  }
+
+  function editProduct(product) {
+    $("productId").value = product.id;
+    $("productName").value = product.name || "";
+    $("productIndustry").value = product.industry || "";
+    $("productCategory").value = product.category || "";
+    $("productPrice").value = product.price ?? "";
+    $("productCurrency").value = product.currency || "VND";
+    $("productCondition").value = product.condition || "";
+    $("productDescription").value = product.description || "";
+    $("productSpecifications").value = product.specifications || "";
+    $("productSellingPoints").value = product.selling_points || "";
+    $("productWarranty").value = product.warranty || "";
+    $("productDelivery").value = product.delivery_policy || "";
+    $("productPromotion").value = product.promotion || "";
+    $("productImages").value = Array.isArray(product.image_urls)
+      ? product.image_urls.join("\n")
+      : "";
+    $("productStatus").value = product.status || "ACTIVE";
+
+    $("productFormTitle").textContent = "Chỉnh sửa sản phẩm";
+    $("saveProductButton").textContent = "Cập nhật sản phẩm";
+    $("cancelProductEdit").hidden = false;
+    showMessage("productFormMessage", "Đang chỉnh sửa sản phẩm #" + product.id);
+
+    $("productForm").scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+
+  async function loadProducts() {
+    if (!adminToken) return;
+
+    showMessage("productsMessage", "Đang tải danh sách sản phẩm...");
+
+    try {
+      const result = await postApi("/api/products?limit=100");
+      productsCache = Array.isArray(result.data) ? result.data : [];
+
+      renderProducts();
+      populateGenerationProducts();
+
+      showMessage(
+        "productsMessage",
+        productsCache.length
+          ? "Đã tải danh sách sản phẩm."
+          : "Chưa có sản phẩm. Bạn có thể thêm sản phẩm ở biểu mẫu phía trên."
+      );
+    } catch (error) {
+      showMessage("productsMessage", "Lỗi tải sản phẩm: " + error.message, true);
+    }
+  }
+
+  function renderProducts() {
+    const tbody = $("productsList");
+    tbody.replaceChildren();
+
+    $("productsCount").textContent =
+      "Tổng số: " + productsCache.length + " sản phẩm";
+
+    if (!productsCache.length) {
+      const row = document.createElement("tr");
+      const cell = document.createElement("td");
+      cell.colSpan = 4;
+      cell.textContent = "Chưa có sản phẩm.";
+      cell.style.cssText = "padding:20px;text-align:center;color:#788496";
+      row.appendChild(cell);
+      tbody.appendChild(row);
+      return;
+    }
+
+    productsCache.forEach(product => {
+      const row = document.createElement("tr");
+
+      const nameCell = document.createElement("td");
+      nameCell.style.cssText = "padding:12px;border-bottom:1px solid #eee";
+      const name = document.createElement("strong");
+      name.textContent = product.name || "Sản phẩm";
+      nameCell.appendChild(name);
+
+      if (product.category) {
+        const category = document.createElement("div");
+        category.textContent = product.category;
+        category.style.cssText = "font-size:12px;color:#788496;margin-top:4px";
+        nameCell.appendChild(category);
+      }
+
+      const priceCell = document.createElement("td");
+      priceCell.textContent = money(product.price, product.currency);
+      priceCell.style.cssText = "padding:12px;border-bottom:1px solid #eee";
+
+      const statusCell = document.createElement("td");
+      statusCell.textContent =
+        product.status === "ACTIVE" ? "Đang kinh doanh" : "Ngừng kinh doanh";
+      statusCell.style.cssText = "padding:12px;border-bottom:1px solid #eee";
+
+      const actionCell = document.createElement("td");
+      actionCell.style.cssText =
+        "padding:12px;border-bottom:1px solid #eee;white-space:nowrap";
+
+      const editButton = document.createElement("button");
+      editButton.type = "button";
+      editButton.textContent = "Sửa";
+      editButton.dataset.action = "edit";
+      editButton.dataset.id = product.id;
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.textContent = "Xóa";
+      deleteButton.dataset.action = "delete";
+      deleteButton.dataset.id = product.id;
+      deleteButton.style.cssText =
+        "margin-left:6px;background:#dc3545";
+
+      actionCell.append(editButton, deleteButton);
+      row.append(nameCell, priceCell, statusCell, actionCell);
+      tbody.appendChild(row);
+    });
+  }
+
+  $("productForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!adminToken) {
+      showMessage("productFormMessage", "Vui lòng kết nối API trước.", true);
+      return;
+    }
+
+    const id = $("productId").value;
+    const button = $("saveProductButton");
+    button.disabled = true;
+
+    try {
+      const data = productFormData();
+
+      if (id) {
+        await postApi("/api/products/" + encodeURIComponent(id), {
+          method: "PATCH",
+          body: JSON.stringify(data)
+        });
+        showMessage("productFormMessage", "Đã cập nhật sản phẩm thành công.");
+      } else {
+        await postApi("/api/products", {
+          method: "POST",
+          body: JSON.stringify(data)
+        });
+        showMessage("productFormMessage", "Đã thêm sản phẩm thành công.");
+      }
+
+      resetProductForm();
+      await loadProducts();
+      await loadGeneratedHistory();
+    } catch (error) {
+      showMessage("productFormMessage", "Lỗi: " + error.message, true);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $("cancelProductEdit").addEventListener("click", resetProductForm);
+  $("reloadProductsButton").addEventListener("click", loadProducts);
+
+  $("productsList").addEventListener("click", async event => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+
+    const product = productsCache.find(
+      item => String(item.id) === button.dataset.id
+    );
+    if (!product) return;
+
+    if (button.dataset.action === "edit") {
+      editProduct(product);
+      return;
+    }
+
+    if (button.dataset.action === "delete") {
+      if (!confirm(
+        "Bạn có chắc muốn xóa sản phẩm \"" + product.name + "\" không?"
+      )) return;
+
+      button.disabled = true;
+
+      try {
+        await postApi("/api/products/" + encodeURIComponent(product.id), {
+          method: "DELETE"
+        });
+
+        resetProductForm();
+        await loadProducts();
+        showMessage("productsMessage", "Đã xóa sản phẩm.");
+      } catch (error) {
+        showMessage("productsMessage", "Lỗi xóa sản phẩm: " + error.message, true);
+        button.disabled = false;
+      }
+    }
+  });
+
+  function populateGenerationProducts() {
+    const select = $("generationProduct");
+    const previousValue = select.value;
+
+    select.replaceChildren();
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Chọn sản phẩm";
+    select.appendChild(placeholder);
+
+    productsCache
+      .filter(product => product.status === "ACTIVE")
+      .forEach(product => {
+        const option = document.createElement("option");
+        option.value = product.id;
+        option.textContent = product.name + " — " +
+          money(product.price, product.currency);
+        select.appendChild(option);
+      });
+
+    if (previousValue) select.value = previousValue;
+
+    if (!select.value && select.options.length > 1) {
+      select.selectedIndex = 1;
+    }
+  }
+
+  async function loadAnalysisOptions() {
+    const select = $("generationAnalysis");
+    select.replaceChildren();
+
+    const none = document.createElement("option");
+    none.value = "";
+    none.textContent = "Không sử dụng phân tích đối thủ";
+    select.appendChild(none);
+
+    try {
+      const result = await postApi("/api/analysis?limit=100");
+      const analyses = Array.isArray(result.data) ? result.data : [];
+
+      analyses.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.id;
+
+        const summary = item.product_name || item.summary || "Bản phân tích";
+        option.textContent =
+          "#" + item.id + " — " +
+          (item.competitor_name || "Đối thủ") + " — " + summary;
+
+        select.appendChild(option);
+      });
+    } catch (error) {
+      showMessage(
+        "generatorMessage",
+        "Không tải được danh sách phân tích đối thủ: " + error.message,
+        true
+      );
+    }
+  }
+
+  async function loadGeneratedHistory() {
+    if (!adminToken) return;
+
+    showMessage("generatedPostsMessage", "Đang tải lịch sử nội dung...");
+
+    try {
+      const result = await postApi("/api/generated-posts?limit=100");
+      generatedPostsCache = Array.isArray(result.data) ? result.data : [];
+
+      renderGeneratedHistory();
+
+      showMessage(
+        "generatedPostsMessage",
+        "Đã tải " + generatedPostsCache.length + " nội dung."
+      );
+    } catch (error) {
+      showMessage(
+        "generatedPostsMessage",
+        "Lỗi tải lịch sử: " + error.message,
+        true
+      );
+    }
+  }
+
+  function renderGeneratedHistory() {
+    const container = $("generatedPostsList");
+    container.replaceChildren();
+
+    if (!generatedPostsCache.length) {
+      const empty = document.createElement("p");
+      empty.textContent = "Chưa có nội dung AI nào được tạo.";
+      empty.style.color = "#788496";
+      container.appendChild(empty);
+      return;
+    }
+
+    generatedPostsCache.forEach(post => {
+      const card = document.createElement("div");
+      card.style.cssText =
+        "border:1px solid #e7eaf0;border-radius:10px;padding:16px;margin:12px 0;background:#fff";
+
+      const heading = document.createElement("div");
+      heading.style.cssText =
+        "display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px";
+
+      const title = document.createElement("strong");
+      title.textContent =
+        (post.product_name || "Sản phẩm") + " — Bài viết #" + post.id;
+
+      const status = document.createElement("span");
+      status.textContent = post.generation_status || "DRAFT";
+      status.style.cssText = "font-size:12px;color:#6658e8;font-weight:700";
+
+      heading.append(title, status);
+
+      const content = document.createElement("div");
+      content.textContent = post.content || "";
+      content.style.cssText =
+        "white-space:pre-wrap;line-height:1.6;max-height:220px;overflow:auto;margin:12px 0";
+
+      const meta = document.createElement("p");
+      meta.textContent =
+        "Phong cách: " + (post.writing_style || "Mặc định") +
+        " · Ngày tạo: " + (post.created_at || "Không rõ");
+      meta.style.cssText = "font-size:12px;color:#788496";
+
+      const actions = document.createElement("div");
+      actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.textContent = "Sao chép";
+      copyButton.dataset.action = "copy";
+      copyButton.dataset.id = post.id;
+
+      const editButton = document.createElement("button");
+      editButton.type = "button";
+      editButton.textContent = "Sửa nội dung";
+      editButton.dataset.action = "edit";
+      editButton.dataset.id = post.id;
+
+      const reviewButton = document.createElement("button");
+      reviewButton.type = "button";
+      reviewButton.textContent = "Đánh dấu đã xem";
+      reviewButton.dataset.action = "review";
+      reviewButton.dataset.id = post.id;
+      reviewButton.style.background = "#198754";
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.textContent = "Xóa";
+      deleteButton.dataset.action = "delete";
+      deleteButton.dataset.id = post.id;
+      deleteButton.style.background = "#dc3545";
+
+      actions.append(copyButton, editButton, reviewButton, deleteButton);
+      card.append(heading, content, meta, actions);
+      container.appendChild(card);
+    });
+  }
+
+  $("generatorForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!adminToken) {
+      showMessage("generatorMessage", "Vui lòng kết nối API trước.", true);
+      return;
+    }
+
+    const productId = $("generationProduct").value;
+    if (!productId) {
+      showMessage("generatorMessage", "Bạn cần chọn sản phẩm.", true);
+      return;
+    }
+
+    const button = $("generateContentButton");
+    button.disabled = true;
+    button.textContent = "AI đang viết nội dung...";
+
+    showMessage(
+      "generatorMessage",
+      "Đang gửi yêu cầu đến AI. Vui lòng chờ, không đóng trang."
+    );
+
+    try {
+      const data = {
+        product_id: Number(productId),
+        analysis_id: $("generationAnalysis").value
+          ? Number($("generationAnalysis").value)
+          : null,
+        writing_style: $("generationStyle").value,
+        additional_request: $("generationRequest").value.trim()
+      };
+
+      const result = await postApi("/api/generated-posts/generate", {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+
+      showMessage(
+        "generatorMessage",
+        "Đã tạo và lưu bản nháp thành công. Nhà cung cấp: " +
+        (result.provider || "AI") + " · Model: " + (result.model || "Không rõ")
+      );
+
+      await loadGeneratedHistory();
+
+    } catch (error) {
+      showMessage(
+        "generatorMessage",
+        "Không tạo được nội dung: " + error.message,
+        true
+      );
+    } finally {
+      button.disabled = false;
+      button.textContent = "✦ Tạo bài viết bằng AI";
+    }
+  });
+
+  $("reloadGeneratedPostsButton").addEventListener(
+    "click",
+    loadGeneratedHistory
+  );
+
+  $("generatedPostsList").addEventListener("click", async event => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+
+    const post = generatedPostsCache.find(
+      item => String(item.id) === button.dataset.id
+    );
+    if (!post) return;
+
+    const id = encodeURIComponent(post.id);
+    const action = button.dataset.action;
+
+    if (action === "copy") {
+      try {
+        await navigator.clipboard.writeText(post.content || "");
+        showMessage("generatedPostsMessage", "Đã sao chép nội dung.");
+      } catch {
+        showMessage(
+          "generatedPostsMessage",
+          "Trình duyệt không cho phép sao chép tự động. Hãy chọn và sao chép nội dung.",
+          true
+        );
+      }
+      return;
+    }
+
+    if (action === "edit") {
+      const updatedContent = prompt(
+        "Chỉnh sửa nội dung bài viết:",
+        post.content || ""
+      );
+
+      if (updatedContent === null) return;
+
+      if (!updatedContent.trim()) {
+        alert("Nội dung không được để trống.");
+        return;
+      }
+
+      try {
+        await postApi("/api/generated-posts/" + id, {
+          method: "PATCH",
+          body: JSON.stringify({ content: updatedContent })
+        });
+
+        await loadGeneratedHistory();
+        showMessage("generatedPostsMessage", "Đã cập nhật nội dung.");
+      } catch (error) {
+        showMessage("generatedPostsMessage", "Lỗi cập nhật: " + error.message, true);
+      }
+      return;
+    }
+
+    if (action === "review") {
+      try {
+        await postApi("/api/generated-posts/" + id, {
+          method: "PATCH",
+          body: JSON.stringify({ generation_status: "REVIEWED" })
+        });
+
+        await loadGeneratedHistory();
+        showMessage("generatedPostsMessage", "Đã đánh dấu nội dung đã xem.");
+      } catch (error) {
+        showMessage("generatedPostsMessage", "Lỗi cập nhật: " + error.message, true);
+      }
+      return;
+    }
+
+    if (action === "delete") {
+      if (!confirm("Bạn có chắc muốn xóa bài viết AI #" + post.id + " không?")) {
+        return;
+      }
+
+      try {
+        await postApi("/api/generated-posts/" + id, {
+          method: "DELETE"
+        });
+
+        await loadGeneratedHistory();
+        showMessage("generatedPostsMessage", "Đã xóa nội dung AI.");
+      } catch (error) {
+        showMessage("generatedPostsMessage", "Lỗi xóa: " + error.message, true);
+      }
+    }
+  });
+
+  /* Kết nối thành công thì tải thêm dữ liệu sản phẩm và nội dung */
+  const previousLoadCompetitorsForProducts = loadCompetitors;
+
+  loadCompetitors = async function() {
+    await previousLoadCompetitorsForProducts();
+
+    if (adminToken) {
+      await loadProducts();
+      await loadAnalysisOptions();
+      await loadGeneratedHistory();
+    }
+  };
+
+  /* Khi mở trang, tải lại dữ liệu tương ứng */
+  navItems.forEach(item => {
+    item.addEventListener("click", () => {
+      if (!adminToken) return;
+
+      if (item.dataset.page === "products") {
+        loadProducts();
+      }
+
+      if (item.dataset.page === "generator") {
+        loadProducts();
+        loadAnalysisOptions();
+        loadGeneratedHistory();
+      }
+    });
+  });
+})();
 </script>
 </body>
 </html>
